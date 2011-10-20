@@ -37,6 +37,10 @@ class BlackBerryPap {
         curl_setopt($ch, CURLOPT_POSTFIELDS, $m->getPushMessage($this->_appId));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, array("Content-Type: multipart/related; boundary=mPsbVQo0a68eIL3OAxnm; type=application/xml", "Accept: text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2", "Connection: keep-alive"));
+        $response = curl_exec($ch);
+        curl_close($ch);
+
+        return new BlackBerryResponse($response);
     }
 
 }
@@ -84,4 +88,60 @@ class BlackBerryMessage {
             urlencode($this->_message) . "\r\n" .
             '--mPsbVQo0a68eIL3OAxnm--' . "\n\r";
     }
+}
+
+class BlackBerryResponse {
+    protected $_id;
+    protected $_replyTime;
+    protected $_responseCode;
+    protected $_responseDesc;
+    protected $_isError = false;
+    protected $_errorCode;
+    protected $_errorStr;
+
+    public function __construct($response) {
+        $p = xml_parser_create();
+        xml_parse_into_struct($p, $response, $vals);
+        $err = xml_get_error_code($p);
+        if ($err > 0) {
+            $this->_isError = true;
+            $this->_errorCode = $err;
+            $this->_errorStr = xml_error_string($err);
+        } else {
+            $this->_replyTime = $vals[1]['attributes']['REPLY-TIME'];
+            $this->_responseCode = $vals[2]['attributes']['CODE'];
+            $this->_responseDesc = $vals[2]['attributes']['DESC'];
+            $this->_id = $vals[1]['attributes']['PUSH-ID'];
+        }
+        xml_parser_free($p);
+    }
+
+    public function getId() {
+        return $this->_id;
+    }
+
+    public function getReplyTime() {
+        return $this->_replyTime;
+    }
+
+    public function getResponseCode() {
+        return $this->_responseCode;
+    }
+
+    public function getResponseDesc() {
+        return $this->_responseDesc;
+    }
+
+    public function isError() {
+        return $this->_isError;
+    }
+
+    public function getErrorCode() {
+        return $this->_errorCode;
+    }
+
+    public function getErrorString() {
+        return $this->_errorStr;
+    }
+
 }
