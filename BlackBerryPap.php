@@ -67,7 +67,7 @@ class BlackBerryMessage {
             $addresses .= '<address address-value="' . $addr . '"/>';
         }
 
-        $xml = = '--mPsbVQo0a68eIL3OAxnm'. "\r\n" .
+        $xml = '--mPsbVQo0a68eIL3OAxnm'. "\r\n" .
             'Content-Type: application/xml; charset=UTF-8' . "\r\n\r\n" .
             '<?xml version="1.0"?>
             <!DOCTYPE pap PUBLIC "-//WAPFORUM//DTD PAP 2.1//EN" "http://www.openmobilealliance.org/tech/DTD/pap_2.1.dtd">
