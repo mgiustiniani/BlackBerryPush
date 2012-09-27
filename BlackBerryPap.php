@@ -5,7 +5,7 @@ class BlackBerryPap {
 	protected $_contentProviderId;
 	protected $_environment;
 
-	public function __construct($appId, $password, $environment = 'dev') {
+	public function __construct($appId, $password) {
 		$this->_appId = $appId;
 		$this->_password = $password;
 	}
@@ -46,6 +46,7 @@ class BlackBerryPap {
 	}
 
 	public function push(BlackBerryMessage $m) {
+		$ch = curl_init();	
 		if ($this->_environment == 'dev')
 			curl_setopt($ch, CURLOPT_URL,
 					"https://pushapi.eval.blackberry.com/mss/PD_pushRequest");
@@ -67,6 +68,8 @@ class BlackBerryPap {
 						"Content-Type: multipart/related; boundary=mPsbVQo0a68eIL3OAxnm; type=application/xml",
 						"Accept: text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2",
 						"Connection: keep-alive"));
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+		
 		$response = curl_exec($ch);
 		curl_close($ch);
 
@@ -83,7 +86,7 @@ class BlackBerryMessage {
 
 	public function __construct($message, $id = null, $delivery = null) {
 		$this->_message = $message;
-		$this->_id = ($id) ? $id : mt_srand();
+		$this->_id = ($id) ? $id : microtime();
 		if ($delivery) {
 			$this->_delivery = (is_int($delivery)) ? $delivery
 					: strtotime($delivery);
